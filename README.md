@@ -1,4 +1,4 @@
-旧版本的仓库已经删除，重新写了，不使用开源UI了，避免太多的纠纷。历史仓库有人fork，可以看看历史发布时间。[https://github.com/sdtm1016/chatgpt-degrade-checker](https://github.com/sdtm1016/chatgpt-degrade-checker)
+旧版本的仓库已经删除，重新写了，不使用开源UI了，避免太多的纠纷。可能在其他平台推广的方式不对，导致了误解。但是每个推广内容都有提他，和文末都推广他的github仓库了，但忘记附加我自己的仓库地址导致误解了吧。历史仓库有人fork，可以看看历史发布时间。[https://github.com/sdtm1016/chatgpt-degrade-checker](https://github.com/sdtm1016/chatgpt-degrade-checker)
 
 ## ChatGPT服务降级检测工具（Chrome扩展程序）
 由于 ChatGPT 会对某些 IP 进行无提示的服务降级，此Chrome扩展程序用于检测你的 IP 是否被 ChatGPT 判定为高风险。在一定程度上可以用于辅助判断你的 IP 是否遭到服务降级。
