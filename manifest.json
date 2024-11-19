@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
 	"name": "ChatGPT Degrade Checker 降级检查",
-	"version": "1.10",
+	"version": "1.20",
 	"description": "ChatGPT降级检查工具（A Chrome extension to display PoW information and IP quality on ChatGPT）",
 	"content_scripts": [
 		{
