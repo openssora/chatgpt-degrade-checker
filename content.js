@@ -1,11 +1,54 @@
 (function () {
 	"use strict";
+	const _originPlatform = navigator.platform;
+	const _originUserAgent = navigator.userAgent;
+
+	function InitUserAgent() {
+		const enabled = localStorage.getItem("randomUserAgentEnabled") === 'true';
+		if (enabled) {
+			setRandomUserAgent(enabled);
+		}
+	}
+
+	function setRandomUserAgent(enabled) {
+		const iosPlatform = "iPhone";
+		const iosUserAgents = [
+			"Mozilla/5.0 (iPhone; CPU iPhone OS 13_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0 Mobile/15E148 Safari/604.1",
+			"Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1",
+			"Mozilla/5.0 (iPhone; CPU iPhone OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1",
+		];
+		const randomIndex = Math.floor(Math.random() * iosUserAgents.length);
+		const randomUserAgent = iosUserAgents[randomIndex];
+		// 重写 navigator.platform
+		Object.defineProperty(navigator, "platform", {
+			get: function () {
+				return enabled ? iosPlatform : _originPlatform;
+			},
+			configurable: true
+		});
+
+		// 重写 navigator.userAgent
+		Object.defineProperty(navigator, "userAgent", {
+			get: function () {
+				return enabled ? randomUserAgent : _originUserAgent;
+			},
+			configurable: true
+		});
+
+		if (enabled) {
+			console.log("已设置新的 User Agent:", randomUserAgent);
+		} else {
+			console.log("已恢复原始的 User Agent:", _originUserAgent);
+		}
+
+		localStorage.setItem("randomUserAgentEnabled", enabled);
+	}
 
 	function createAccordion(data) {
 		const powDifficulty = data.powDifficulty;
 		const userType = data.userType;
-		const ipRiskLevel = getRiskColorAndLevel(powDifficulty).ipRiskLevel;
-		const riskColor = getRiskColorAndLevel(powDifficulty).color;
+		const { ipRiskLevel, color } = getRiskColorAndLevel(powDifficulty);
+
 		// 创建外层容器
 		const accordion = document.createElement("div");
 		Object.assign(accordion.style, {
@@ -42,9 +85,30 @@
 			alignItems: "center",
 			justifyContent: "space-between",
 			backgroundColor: "#f9f9f9",
-			color: riskColor,
+			color,
 			position: "relative",
 		});
+
+		// 创建呼吸灯
+		const breathingLight = document.createElement("div");
+		Object.assign(breathingLight.style, {
+			width: "6px",
+			height: "6px",
+			borderRadius: "50%",
+			marginRight: "4px",
+			backgroundColor: color,
+			animation: "breathing 2s infinite",
+		});
+
+		// 添加呼吸灯动画样式
+		const styleTag = document.createElement("style");
+		styleTag.textContent = `
+			@keyframes breathing {
+				0%, 100% { opacity: 1; transform: scale(1); }
+				50% { opacity: 0.6; transform: scale(0.8); }
+			}
+		`;
+		document.head.appendChild(styleTag);
 
 		// 创建显示风险等级的 span
 		const riskLevelDisplay = document.createElement("span");
@@ -60,16 +124,57 @@
 			transition: "transform 0.3s ease",
 		});
 
+		// 组合到 summary 中
+		summary.appendChild(breathingLight); // 添加呼吸灯
 		summary.appendChild(document.createTextNode("当前降级风险："));
 		summary.appendChild(riskLevelDisplay);
-		summary.appendChild(toggleIcon); // 将符号添加到右边
+		summary.appendChild(toggleIcon);
 
 		details.addEventListener("toggle", function () {
-			toggleIcon.textContent = details.open ? "-" : "+"; // 根据 open 状态切换符号
+			toggleIcon.textContent = details.open ? "-" : "+";
 			toggleIcon.style.transform = details.open
 				? "rotate(90deg)"
 				: "rotate(0deg)";
 		});
+
+		// 一键解除降智功能
+		const unlockFeature = document.createElement("div");
+		Object.assign(unlockFeature.style, {
+			marginTop: "8px",
+			padding: "8px 0",
+			borderTop: "1px solid #ddd",
+		});
+
+		// 功能标题
+		const unlockTitle = document.createElement("span");
+		unlockTitle.textContent = "智能解除降智:";
+		Object.assign(unlockTitle.style, {
+			marginRight: "8px",
+		});
+
+		// 开关按钮
+		let _isFeatureEnabled = localStorage.getItem("randomUserAgentEnabled") === 'true'; // 初始状态
+		const toggleSwitch = document.createElement("button");
+		toggleSwitch.textContent = _isFeatureEnabled ? "已开启" : "点击开启";
+		Object.assign(toggleSwitch.style, {
+			cursor: "pointer",
+			padding: "4px 8px",
+			border: "none",
+			borderRadius: "4px",
+			backgroundColor: "#0078d7",
+			color: "#fff",
+			fontSize: "12px",
+		});
+		console.log('_isFeatureEnabled: ', _isFeatureEnabled);
+		toggleSwitch.addEventListener("click", function () {
+			_isFeatureEnabled = !_isFeatureEnabled;
+			toggleSwitch.textContent = _isFeatureEnabled ? "已开启" : "点击开启";
+			setRandomUserAgent(_isFeatureEnabled);
+		});
+
+		// 组合功能组件
+		unlockFeature.appendChild(unlockTitle);
+		unlockFeature.appendChild(toggleSwitch);
 
 		// 创建内容部分
 		const content = document.createElement("div");
@@ -79,6 +184,8 @@
 			lineHeight: "1.6",
 			backgroundColor: "#fff",
 		});
+
+
 
 		const difficultyText = document.createElement("div");
 		difficultyText.innerHTML = `PoW难度: <span>${
@@ -91,16 +198,17 @@
 		const userTypeText = document.createElement("div");
 		userTypeText.innerHTML = `用户类型: <span>${userType || "未知"}</span>`;
 		const contactInfo = document.createElement("div");
-		contactInfo.style.marginTop = "8px";
+		contactInfo.style.marginTop = "0px";
 		contactInfo.style.borderTop = "1px solid #ddd";
 		contactInfo.style.paddingTop = "8px";
 		contactInfo.style.fontSize = "12px";
 		contactInfo.style.color = "#555";
-		contactInfo.innerHTML = `解除降智访问：<a href="https://upchatgpt.cn" target="_blank" style="color: #0078d7; text-decoration: none;">upchatgpt.cn</a>`;
+		contactInfo.innerHTML = `更多方法访问：<a href="https://upchatgpt.cn" target="_blank" style="color: #0078d7; text-decoration: none;">upchatgpt.cn</a>`;
 
 		content.appendChild(difficultyText);
 		content.appendChild(riskLevelText);
 		content.appendChild(userTypeText);
+		content.appendChild(unlockFeature);
 		content.appendChild(contactInfo);
 
 		details.appendChild(summary);
@@ -118,6 +226,7 @@
 				difficultyText.innerHTML = `PoW难度: <span>${newData.powDifficulty}</span>`;
 				riskLevelText.innerHTML = `IP风险等级: <span>${ipRiskLevel}</span>`;
 				summary.style.color = color;
+				breathingLight.style.backgroundColor = color;
 				riskLevelDisplay.textContent = ipRiskLevel;
 			}
 			if (newData.userType !== undefined) {
@@ -128,6 +237,7 @@
 		return accordion;
 	}
 
+	// 颜色和风险等级映射逻辑保持不变
 	function getRiskColorAndLevel(difficulty) {
 		const cleanDifficulty = difficulty.startsWith("0x")
 			? difficulty.slice(2)
@@ -165,6 +275,7 @@
 		userType: "未知",
 	};
 	const accordion = createAccordion(mockData);
+	InitUserAgent();
 
 	window.addEventListener("message", function (e) {
 		const difficulty = e.data.difficulty;
