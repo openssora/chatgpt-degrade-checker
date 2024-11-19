@@ -19,6 +19,9 @@
 3. 点击提示框，可以查看 PoW信息和IP风险等级。
 ![ChatGPT-Degrade-Checker-4](ChatGPT-Degrade-Checker-4.jpg)
 
+4. 支持智能解除降智，点击开启即可，同时可以关闭。该功能可以快速解除降智，开启之后如果还没有解除，可以刷新页面即可。（但不能百分百恢复5位数的pow难度）
+![ChatGPT-Degrade-Checker-7](ChatGPT-Degrade-Checker-7.jpg)
+
 
 ## 本地开发：安装及使用
 
