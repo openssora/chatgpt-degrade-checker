@@ -332,7 +332,7 @@
 				ipRiskLevel: "未知",
 			};
 		}
-		
+
 		switch (riskLevel) {
 			case 0:
 			case 1:
@@ -411,7 +411,7 @@
 				"https://status.openai.com/api/v2/status.json"
 			);
 			if (!response.ok) {
-				console.error(`HTTP error! status: ${response.status}`);
+				console.log(`HTTP error! status: ${response.status}`);
 				return;
 			}
 			const data = await response.json();
