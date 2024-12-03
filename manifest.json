@@ -1,8 +1,8 @@
 {
 	"manifest_version": 3,
 	"name": "ChatGPT Degrade Checker 降级检查",
-	"version": "1.20",
-	"description": "ChatGPT降级检查工具（ChatGPT downgrade check tool, supports relieve of GPT service downgrade.）",
+	"version": "1.30",
+	"description": "ChatGPT降级检查工具,ChatGPT内部服务状态监控 (ChatGPT downgrade check tool, ChatGPT Service Status Monitoring, supports relieve of GPT service downgrade.)",
 	"content_scripts": [
 		{
 			"matches": ["*://chatgpt.com/*"],
