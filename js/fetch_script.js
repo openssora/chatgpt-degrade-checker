@@ -31,4 +31,17 @@
 		}
 		return response;
 	};
+
+
+	// 重写 localStorage.setItem，触发自定义事件
+	const originalSetItem = localStorage.setItem;
+	localStorage.setItem = function (key, value) {
+		const event = {
+			type: "localStorageChange",
+			key: key,
+			newValue: value,
+		};
+		window.postMessage(event, "*");
+		originalSetItem.apply(this, arguments);
+	};
 })();

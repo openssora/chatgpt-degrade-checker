@@ -2,6 +2,7 @@
 	"use strict";
 	const _originPlatform = navigator.platform;
 	const _originUserAgent = navigator.userAgent;
+	const _gptTheme = localStorage.getItem("theme");
 
 	function InitUserAgent() {
 		const enabled = localStorage.getItem("randomUserAgentEnabled") === "true";
@@ -253,7 +254,7 @@
 			padding: "12px",
 			fontSize: "12px",
 			lineHeight: "1.6",
-			backgroundColor: "#fff",
+			backgroundColor: _gptTheme === "dark" ? "rgba(0, 0, 0, 0.8)" : "#fff",
 		});
 
 		const difficultyText = document.createElement("div");
@@ -314,6 +315,13 @@
 				<div>描述：<span style="color:${gpt_indicator_color};font-size: 10px;">${newData.gpt_description}</span></div>`;;
 			}
 		};
+
+		// 更新主题背景
+		accordion.updateTheme = function (theme) {
+			Object.assign(content.style, {
+				backgroundColor: theme === "dark" ? "rgba(0, 0, 0, 0.8)" : "#fff",
+			});
+		}
 
 		return accordion;
 	}
@@ -396,12 +404,20 @@
 
 	// 接收 message
 	window.addEventListener("message", function (e) {
-		const difficulty = e.data.difficulty;
-		const persona = e.data.persona;
-		accordion.set({
-			powDifficulty: difficulty,
-			userType: persona,
-		});
+		if (e.data.type == "localStorageChange") {
+			const key = e.data.key;
+			const value = e.data.newValue;
+			if (key === "theme") {
+				accordion.updateTheme(value);
+			}
+		} else {
+			const difficulty = e.data.difficulty;
+			const persona = e.data.persona;
+			accordion.set({
+				powDifficulty: difficulty,
+				userType: persona,
+			});
+		}
 	});
 
 	// 获取gpt的status信息
