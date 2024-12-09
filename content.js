@@ -11,6 +11,153 @@
 		}
 	}
 
+	// 基础样式配置
+	const STYLES = {
+		button: {
+			base: {
+				fontSize: "11px",
+				padding: "6px 12px",
+				border: "1px solid #e2e8f0",
+				borderRadius: "6px",
+				backgroundColor: "#f8fafc",
+				color: "#64748b",
+				cursor: "not-allowed",
+				transition: "all 0.2s ease",
+				position: "relative",
+				display: "flex",
+				alignItems: "center",
+				gap: "6px",
+				fontWeight: "500",
+				boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+			},
+			hover: {
+				backgroundColor: "#f1f5f9",
+				transform: "translateY(-1px)",
+				boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+			},
+			default: {
+				backgroundColor: "#f8fafc",
+				transform: "translateY(0)",
+				boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+			}
+		},
+		tooltip: {
+			base: {
+				visibility: "hidden",
+				backgroundColor: "#1e293b",
+				color: "#fff",
+				textAlign: "left",
+				borderRadius: "8px",
+				padding: "12px",
+				position: "absolute",
+				zIndex: "100",
+				bottom: "calc(100% + 12px)",
+				left: "100%",
+				transform: "translateX(-50%)",
+				opacity: "0",
+				transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+				fontSize: "11px",
+				lineHeight: "1.6",
+				boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+				border: "1px solid rgba(255, 255, 255, 0.1)",
+			},
+			visible: {
+				visibility: "visible",
+				opacity: "1"
+			},
+			hidden: {
+				visibility: "hidden",
+				opacity: "0"
+			}
+		}
+	};
+	
+	// 工具函数
+	const createTooltipArrow = () => `
+		<div style="
+		position: absolute;
+		bottom: -5px;
+		left: 50%;
+		transform: translateX(-50%) rotate(45deg);
+		width: 10px;
+		height: 10px;
+		background-color: #1e293b;
+		border-right: 1px solid rgba(255, 255, 255, 0.1);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		"></div>
+	`;
+	
+	// 创建按钮的工厂函数
+	function createButton({ text, icon = '', tooltipContent = '', width = "200px" }) {
+		const button = document.createElement("button");
+		button.innerHTML = icon + text;
+		Object.assign(button.style, STYLES.button.base);
+	
+		const tooltip = document.createElement("div");
+		Object.assign(tooltip.style, STYLES.tooltip.base, { width });
+		tooltip.innerHTML = createTooltipArrow() + tooltipContent;
+		
+		// 添加交互事件
+		button.addEventListener("mouseenter", () => {
+			Object.assign(button.style, STYLES.button.hover);
+			Object.assign(tooltip.style, STYLES.tooltip.visible);
+		});
+	
+		button.addEventListener("mouseleave", () => {
+			Object.assign(button.style, STYLES.button.default);
+			Object.assign(tooltip.style, STYLES.tooltip.hidden);
+		});
+	
+		button.appendChild(tooltip);
+		return button;
+	}
+	
+	// 按钮配置
+	const BUTTONS_CONFIG = {
+		unlock: {
+			text: "解除降智方法",
+			tooltipContent: `
+				<div style="position: relative;">
+				<div style="font-weight: 600; margin-bottom: 8px; color: #60a5fa;">推荐解决方案</div>
+				<div style="margin-bottom: 4px;">1. 切换到ChatGPT APP版本</div>
+				<div style="margin-bottom: 4px;">2. 切换到较为稳定的IP</div>
+				<div style="margin-bottom: 4px;">3. 使用 Mac 桌面版本</div>
+				<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+					<a href="https://upchatgpt.cn" target="_blank" style="color: #60a5fa; text-decoration: none;">
+					查看更多解决方案 →
+					</a>
+				</div>
+				</div>
+			`,
+			width: "150px"
+		},
+		monitor: {
+			text: "状态监控介绍",
+			icon: `
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M12 6V12L16 14M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" 
+				stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+				</svg>
+			`,
+			tooltipContent: `
+				<div style="position: relative;">
+				状态监控功能描述：<br>ChatGPT官方服务状态监控,提供实时状态信息,帮助用户了解ChatGPT服务的运行情况。
+				</div>
+			`,
+			width: "200px"
+		}
+	};
+	
+	// 创建按钮组
+	function createButtonGroup(unlockFeature) {
+		const toggleSwitch = createButton(BUTTONS_CONFIG.unlock);
+		const gptMonitorTipButton = createButton(BUTTONS_CONFIG.monitor);
+	
+		unlockFeature.style.gap = "8px";
+		unlockFeature.appendChild(toggleSwitch);
+		unlockFeature.appendChild(gptMonitorTipButton);
+	}
+
 	function setRandomUserAgent(enabled) {
 		const iosPlatform = "iPhone";
 		const iosUserAgents = [
@@ -141,104 +288,26 @@
 				: "rotate(0deg)";
 		});
 
-		// 一键解除降智功能
-		const unlockFeature = document.createElement("div");
-		Object.assign(unlockFeature.style, {
-			marginTop: "8px",
-			padding: "8px 0",
-			borderTop: "1px solid #ddd",
-		});
-
-		// 功能标题
-		const unlockTitle = document.createElement("span");
-		unlockTitle.textContent = "智能解除降智:";
-		Object.assign(unlockTitle.style, {
-			marginRight: "8px",
-		});
-
-		// // 开关按钮
-		// let _isFeatureEnabled =
-		// 	localStorage.getItem("randomUserAgentEnabled") === "true"; // 初始状态
-		// const toggleSwitch = document.createElement("button");
-		// toggleSwitch.textContent = _isFeatureEnabled ? "已开启" : "点击开启";
-		// Object.assign(toggleSwitch.style, {
-		// 	cursor: "pointer",
-		// 	padding: "2px 4px",
-		// 	border: "none",
-		// 	borderRadius: "4px",
-		// 	backgroundColor: "#0078d7",
-		// 	color: "#fff",
-		// 	fontSize: "10px",
-		// 	disabled: true,
+		// // 功能描述按钮组 下线
+		// const unlockFeature = document.createElement("div");
+		// Object.assign(unlockFeature.style, {
+		// 	marginTop: "8px",
+		// 	padding: "8px 0",
+		// 	borderTop: "1px solid #ddd",
+		// 	display: "flex",
+		// 	alignItems: "center",
+		// 	justifyContent: "space-between",
 		// });
-
-		const toggleSwitch = document.createElement("button");
-		toggleSwitch.textContent = "点击开启";
-		Object.assign(toggleSwitch.style, {
-			fontSize: "10px",
-			padding: "2px 4px",
-			border: "1px solid #ccc",
-			borderRadius: "2px",
-			backgroundColor: "#f5f5f5", // 置灰背景色
-			color: "#999", // 置灰文字颜色
-			cursor: "not-allowed", // 鼠标样式显示禁用状态
-			position: "relative", // 为tooltip定位
-		});
-
-		// // 2024-12-03 暂时下线。
-		// toggleSwitch.addEventListener("click", function () {
-		// 	_isFeatureEnabled = !_isFeatureEnabled;
-		// 	toggleSwitch.textContent = _isFeatureEnabled ? "已开启" : "点击开启";
-		// 	setRandomUserAgent(_isFeatureEnabled);
-		// });
-
-		const tooltip = document.createElement("div");
-		tooltip.innerHTML = "建议人工解除降智，推荐方法：<br>1. 切换到ChatGPT APP版本<br>2. 切换到较为稳定的IP<br>"; // 将\n替换为<br>实现换行
-		Object.assign(tooltip.style, {
-			visibility: "hidden",
-			width: "140px", // 增加宽度以适应更多内容
-			backgroundColor: "rgba(0, 0, 0, 0.8)", // 半透明黑色背景
-			color: "#fff",
-			textAlign: "left", // 左对齐文本
-			borderRadius: "4px",
-			padding: "4px 8px",
-			position: "absolute",
-			zIndex: "100",
-			bottom: "calc(100% + 8px)", // 在按钮上方显示，留出间距
-			left: "10%",
-			transform: "translateX(-50%)", // 水平居中
-			opacity: "0",
-			transition: "opacity 0.3s, visibility 0.3s",
-			fontSize: "10px",
-			lineHeight: "1.5", // 适当的行高
-			whiteSpace: "pre-wrap", // 保留换行符
-			boxShadow: "0 2px 8px rgba(0,0,0,0.15)", // 添加阴影效果
-		});
-		// 添加hover事件
-		toggleSwitch.addEventListener("mouseenter", function () {
-			tooltip.style.visibility = "visible";
-			tooltip.style.opacity = "1";
-		});
-	
-		toggleSwitch.addEventListener("mouseleave", function () {
-			tooltip.style.visibility = "hidden";
-			tooltip.style.opacity = "0";
-		});
-	
-		toggleSwitch.appendChild(tooltip);
-
-		// 组合功能组件
-		unlockFeature.appendChild(unlockTitle);
-		unlockFeature.appendChild(toggleSwitch);
-
+		// createButtonGroup(unlockFeature);
 
 
 		// ======添加 ChatGPT 服务状态监控元素========
 		const ChatGPTStatusText = document.createElement("div");
 		ChatGPTStatusText.innerHTML = `
-		<div style="text-align: center; font-size: 12px; font-weight: bold; margin-bottom: 4px">ChatGPT内部服务状态监控</div>
-		<div>当前状态：<span style="color:${gpt_indicator_color}">${gpt_indicator_text}</span></div>
-		<div>状态描述：<span style="color:${gpt_indicator_color};font-size: 10px;">${gpt_description}</span></div>`;
+		<div style="text-align: center; font-size: 12px; font-weight: bold; margin-bottom: 4px">ChatGPT官方服务状态监控</div>
+		<div>状态：<span style="color:${gpt_indicator_color}">${gpt_indicator_text}</span></div>
+		<div>事件描述：<span style="color:${gpt_indicator_color};font-size: 10px;">${gpt_description}</span></div>
+		`;
 		Object.assign(ChatGPTStatusText.style, {
 			fontSize: "10px",
 			lineHeight: "1.6",
@@ -271,15 +340,36 @@
 		contactInfo.style.marginTop = "0px";
 		contactInfo.style.borderTop = "1px solid #ddd";
 		contactInfo.style.paddingTop = "8px";
-		contactInfo.style.fontSize = "10px";
+		contactInfo.style.fontSize = "12px";
 		contactInfo.style.color = "#555";
-		contactInfo.innerHTML = `更多方法访问：<a href="https://upchatgpt.cn" target="_blank" style="color: #0078d7; text-decoration: none;">upchatgpt.cn</a>`;
+		contactInfo.innerHTML = `
+		<div style="display: flex; gap: 12px; justify-content: center;">
+			<a href="https://upchatgpt.cn/how-pay-upgrade-chatgpt-in-openai/" 
+			target="_blank" 
+			style="display: flex; align-items: center; gap: 4px; padding: 6px 10px; font-size: 11px; color: #fff; background-color: #2563eb; border: none; border-radius: 6px; text-decoration: none; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);"
+			onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(37, 99, 235, 0.3)';"
+			onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(37, 99, 235, 0.2)';">
+				GPT 升级教程
+			</a>
+			<a href="https://upchatgpt.cn/img/qrcode-gzh.png" 
+			target="_blank" 
+			style="display: flex; align-items: center; gap: 4px; padding: 6px 10px; font-size: 11px; color: #fff; background-color: #2563eb; border: none; border-radius: 6px; text-decoration: none; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);"
+			onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(37, 99, 235, 0.3)';"
+			onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(37, 99, 235, 0.2)';">
+				<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					<path d="M22 6L12 13L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+				</svg>
+				联系作者
+			</a>
+		</div>`;
+	
 
 		content.appendChild(difficultyText);
 		content.appendChild(riskLevelText);
 		content.appendChild(userTypeText);
 		content.appendChild(ChatGPTStatusText); // 添加服务状态监控
-		content.appendChild(unlockFeature);
+		// content.appendChild(unlockFeature); // 功能描述按钮组, 下线
 		content.appendChild(contactInfo);
 
 		details.appendChild(summary);
@@ -310,9 +400,13 @@
 			if (newData.gpt_indicator !== undefined) {
 				const { gpt_indicator_color, gpt_indicator_text } = applyIndicatorColorAndText(newData.gpt_indicator);
 				ChatGPTStatusText.innerHTML = `
-				<div style="text-align: center; font-size: 12px; font-weight: bold; margin-bottom: 4px">ChatGPT内部服务状态监控</div>
+				<div style="text-align: center; font-size: 12px; font-weight: bold; margin-bottom: 4px">ChatGPT官方服务状态监控</div>
 				<div>状态：<span style="color:${gpt_indicator_color}">${gpt_indicator_text}</span></div>
-				<div>描述：<span style="color:${gpt_indicator_color};font-size: 10px;">${newData.gpt_description}</span></div>`;;
+				<div>事件描述：<span style="color:${gpt_indicator_color};font-size: 10px;">${newData.gpt_description}</span></div>
+				<div>影响范围：<span font-size: 10px;">${newData.gpt_impact_range}</span></div>
+				<div>发生时间：<span font-size: 10px;">${newData.gpt_create_at}</span></div>
+				<div>处理结果：<span font-size: 10px;">${newData.gpt_process_status}</span></div>
+				`;;
 			}
 		};
 
@@ -394,7 +488,7 @@
 	}
 
 	const mockInitData = {
-		powDifficulty: "未知",
+		powDifficulty: "012328",
 		userType: "未知",
 		gpt_indicator: "none",
 		gpt_description: "All Systems Operational",
@@ -420,7 +514,7 @@
 		}
 	});
 
-	// 获取gpt的status信息
+	// 获取gpt的status信息 （下线）
 	async function fetchChatGPTStatus() {
 		try {
 			const response = await fetch(
@@ -444,5 +538,64 @@
 			console.log("Error fetching status:", error);
 		}
 	}
-	fetchChatGPTStatus();
+
+	// 太平洋时间转换当前浏览器本地时区时间
+	function transformPacificTime(time) {
+		const pacificTime = new Date(time);
+		return pacificTime.toLocaleString();
+	}
+
+	// 计算当前GPT解决问题之后的时间是否大于3天
+	function resolvedTimeIsGreaterThan3Days(resolvedTime) {
+		const currentTime = new Date();
+		const resolvedDate = new Date(resolvedTime);
+		const timeDifference = currentTime - resolvedDate;
+		const threeDaysInMilliseconds = 3 * 24 * 60 * 60 * 1000;
+		return timeDifference > threeDaysInMilliseconds;
+	}
+
+	// 获取GPT近期发生的事件
+	async function fetchChatGPTByIncidents() {
+		try {
+			const response = await fetch(
+				"https://status.openai.com/api/v2/incidents.json"
+			);
+			if (!response.ok) {
+				console.log(`HTTP error! incidents: ${response.status}`);
+				return;
+			}
+			const data = await response.json();
+			const incidents = data.incidents || [];
+			if (incidents.length) {
+				const firstIncident = incidents[0];
+				const indicator = firstIncident.impact;
+				const impactRange = firstIncident.components?.map(c => c.name).join("、");
+				const description = firstIncident.name; // 事件描述
+				const processStatus = firstIncident.status; // 处理状态
+				const created_at = firstIncident.monitoring_at;	// 发生时间
+				const resolved_at = firstIncident.resolved_at; // 解决时间
+
+				// 当最近的问题被解决了，且时间大于3天之后，则不再显示
+				if (processStatus === "resolved" && resolvedTimeIsGreaterThan3Days(resolved_at)) {
+					return;
+				} 
+				accordion.setGPTStatus({
+					gpt_indicator: indicator,
+					gpt_description: description,
+					gpt_impact_range: impactRange,
+					gpt_process_status: processStatus,
+					gpt_create_at: transformPacificTime(created_at),
+				});
+				
+			}
+		} catch (error) {
+			console.log("Error fetching incidents:", error);
+		}
+	}
+
+	// 异步执行，防止阻塞
+	setTimeout(() => {
+		fetchChatGPTByIncidents();
+	}, 3e3);
+	
 })();
